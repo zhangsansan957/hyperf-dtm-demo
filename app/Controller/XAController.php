@@ -20,7 +20,7 @@ class XAController
 
     private GrpcClient $grpcClient;
 
-    protected string $serviceUri = 'http://127.0.0.1:9502';
+    protected string $serviceUri = 'http://172.16.82.11:9501';
 
     public function __construct(
         private XA $xa,
@@ -47,6 +47,7 @@ class XAController
             // XA http模式下获取子事物返回结构
             /* @var ResponseInterface $respone */
             $respone->getBody()->getContents();
+            throw new \Exception('gloabl 1 failed');
             // 调用子事物接口
             $payload = ['amount' => 10];
             var_dump('gloabl 2');

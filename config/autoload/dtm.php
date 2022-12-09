@@ -11,7 +11,7 @@ use DtmClient\Constants\DbType;
 
 return [
     'protocol' => Protocol::HTTP,
-    'server' => '127.0.0.1',
+    'server' => '172.16.82.11',
     'port' => [
         'http' => 36789,
         'grpc' => 36790,
@@ -24,8 +24,6 @@ return [
             'expire_seconds' => 7 * 86400,
         ],
         'apply' => [
-            \App\Controller\TccController::class . '::transBConfirm',
-            'App\Controller\TccController::transBCancel',
         ],
     ],
     'guzzle' => [
@@ -34,7 +32,7 @@ return [
     // Configuration is required only if you use the XA transaction mode
     'database' => [
         'host' => env('DB_HOST', 'localhost'),
-        'port' => env('DB_PORT', 3306),
+        'port' => (int)env('DB_PORT', 3306),
         'database' => env('DB_DATABASE', 'hyperf'),
         'username' => env('DB_USERNAME', 'root'),
         'password' => env('DB_PASSWORD', ''),

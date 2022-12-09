@@ -21,14 +21,14 @@ Router::addServer('grpc', function () {
 });
 
 Router::addGroup('/tcc', function () {
-    Router::get('/success', 'App\Controller\TccController::successCase', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::get('/query_all', 'App\Controller\TccController@queryAllCase', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::get('/rollbackCase', 'App\Controller\TccController@rollbackCase', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transA/try', 'App\Controller\TccController@transATry', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transA/confirm', 'App\Controller\TccController@transAConfirm', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transA/cancel', 'App\Controller\TccController@transACancel', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transB/try', 'App\Controller\TccController@transBTry', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transB/try/fail', 'App\Controller\TccController@transBTryFail', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transB/confirm', 'App\Controller\TccController@transBConfirm', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
-    Router::post('/transB/cancel', 'App\Controller\TccController@transBCancel', ['middleware' => [\DtmClient\Middleware\DtmMiddleware::class]]);
+    Router::get('/success', 'App\Controller\TccController::successCase');
+    Router::get('/query_all', 'App\Controller\TccController@queryAllCase');
+    Router::get('/rollbackCase', 'App\Controller\TccController@rollbackCase');
+    Router::post('/transA/try', 'App\Controller\TccController@transATry');
+    Router::post('/transA/confirm', 'App\Controller\TccController@transAConfirm');
+    Router::post('/transA/cancel', 'App\Controller\TccController@transACancel');
+    Router::post('/transB/try', 'App\Controller\TccController@transBTry');
+    Router::post('/transB/try/fail', 'App\Controller\TccController@transBTryFail');
+    Router::post('/transB/confirm', 'App\Controller\TccController@transBConfirm');
+    Router::post('/transB/cancel', 'App\Controller\TccController@transBCancel');
 });

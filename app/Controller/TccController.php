@@ -12,6 +12,7 @@ use DtmClient\Api\ApiInterface;
 use DtmClient\Middleware\DtmMiddleware;
 use DtmClient\TCC;
 use DtmClient\TransContext;
+use Hyperf\DbConnection\Db;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -36,7 +37,11 @@ class TccController extends AbstractController
         try {
             $this->tcc->globalTransaction(function (TCC $tcc) {
                 $tcc->callBranch(
-                    ['trans_name' => 'trans_A'],
+                    [
+                        'trans_name' => 'trans_A',
+                        'code' => 't1',
+                        'number' => 2,
+                    ],
                     $this->serviceUri . '/tcc/transA/try',
                     $this->serviceUri . '/tcc/transA/confirm',
                     $this->serviceUri . '/tcc/transA/cancel'
@@ -65,7 +70,11 @@ class TccController extends AbstractController
         try {
             $this->tcc->globalTransaction(function (TCC $tcc) {
                 $tcc->callBranch(
-                    ['trans_name' => 'trans_A'],
+                    [
+                        'trans_name' => 'trans_A',
+                        'code' => 't1',
+                        'number' => 2
+                    ],
                     $this->serviceUri . '/tcc/transA/try',
                     $this->serviceUri . '/tcc/transA/confirm',
                     $this->serviceUri . '/tcc/transA/cancel'
@@ -83,24 +92,47 @@ class TccController extends AbstractController
         }
     }
 
-    public function transATry(RequestInterface $request): array
+    public function transATry(RequestInterface $request, ResponseInterface $response)
     {
+        var_dump('A try');
+        $number = $request->input('number');
+        $code = $request->input('code');
+        // 查询库存
+        if (!Db::table('goods')->where('code', $code)->where('useful_num', '>=', $number)->exists()) {
+            return $response->withStatus(409);
+        }
+        Db::table('goods')->where('code', $code)->update([
+            'useful_num' => Db::raw('useful_num -' . $number)
+        ]);
+
         return [
             'dtm_result' => 'SUCCESS',
         ];
     }
 
     #[Barrier]
-    public function transAConfirm(RequestInterface $request): array
+    public function transAConfirm(RequestInterface $request, ResponseInterface $response): array
     {
+        var_dump('A confirm');
+
         return [
             'dtm_result' => 'SUCCESS',
         ];
     }
 
     #[Barrier]
-    public function transACancel(RequestInterface $request): array
+    public function transACancel(RequestInterface $request, ResponseInterface $response): array
     {
+        // var_dump('A cancel');
+        // // 减冻结库存
+        // try {
+        //     Db::table('goods')->where('code', $code)->update([
+        //         'useful_num' => Db::raw('useful_num +' . $number),
+        //     ]);
+        // } catch (\Throwable $e) {
+        //     return $response->withStatus(409);
+        // }
+
         return [
             'dtm_result' => 'SUCCESS',
         ];
@@ -108,6 +140,7 @@ class TccController extends AbstractController
 
     public function transBTry(): array
     {
+        var_dump('B try');
         return [
             'dtm_result' => 'SUCCESS',
         ];
@@ -121,6 +154,7 @@ class TccController extends AbstractController
 
     public function transBConfirm(): array
     {
+        var_dump('B confirm');
         return [
             'dtm_result' => 'SUCCESS',
         ];
@@ -128,6 +162,7 @@ class TccController extends AbstractController
 
     public function transBCancel(): array
     {
+        var_dump('B cancel');
         return [
             'dtm_result' => 'SUCCESS',
         ];

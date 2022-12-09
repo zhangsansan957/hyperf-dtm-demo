@@ -11,6 +11,6 @@ namespace App\Controller;
 abstract class AbstractController
 {
 
-    protected string $serviceUri = 'http://127.0.0.1:9502';
+    protected string $serviceUri = 'http://172.16.82.11:9501';
 
 }
