@@ -1,36 +1,31 @@
-# Introduction
+# 介绍
+Hyperf框架使用dtm的demo项目
 
-This is a skeleton application using the Hyperf framework. This application is meant to be used as a starting place for those looking to get their feet wet with Hyperf Framework.
+# 准备
 
-# Requirements
-
-Hyperf has some requirements for the system environment, it can only run under Linux and Mac environment, but due to the development of Docker virtualization technology, Docker for Windows can also be used as the running environment under Windows.
-
-The various versions of Dockerfile have been prepared for you in the [hyperf/hyperf-docker](https://github.com/hyperf/hyperf-docker) project, or directly based on the already built [hyperf/hyperf](https://hub.docker.com/r/hyperf/hyperf) Image to run.
-
-When you don't want to use Docker as the basis for your running environment, you need to make sure that your operating environment meets the following requirements:  
-
- - PHP >= 7.3
- - Swoole PHP extension >= 4.5，and Disabled `Short Name`
+ - PHP7.4
+ - Swoole PHP extension >= 4.6.6，and Disabled `Short Name`
  - OpenSSL PHP extension
  - JSON PHP extension
  - PDO PHP extension （If you need to use MySQL Client）
  - Redis PHP extension （If you need to use Redis Client）
  - Protobuf PHP extension （If you need to use gRPC Server of Client）
 
-# Installation using Composer
+# 运行项目
+1. 初始化数据迁移`php bin/hyperf.php migrate:install`
 
-The easiest way to create a new Hyperf project is to use Composer. If you don't have it already installed, then please install as per the documentation.
+2. 初始化数据库`php bin/hyperf.php migrate`
 
-To create your new Hyperf project:
+3. 初始化测试数据
 
-$ composer create-project hyperf/hyperf-skeleton path/to/install
+   ``` sql
+   INSERT INTO `goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t1', 100, 0, now(), now());
+   INSERT INTO `goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t2', 100, 0, now(), now());
+   INSERT INTO `goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t3', 100, 0, now(), now());
+   
+   INSERT INTO `other_goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t1', 100, 0, now(), now());
+   INSERT INTO `other_goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t2', 100, 0, now(), now());
+   INSERT INTO `other_goods` (`code`, `useful_num`, `lock_num`, `created_at`, `updated_at`) VALUES ('t3', 100, 0, now(), now());
+   ```
 
-Once installed, you can run the server immediately using the command below.
-
-$ cd path/to/install
-$ php bin/hyperf.php start
-
-This will start the cli-server on port `9501`, and bind it to all network interfaces. You can then visit the site at `http://localhost:9501/`
-
-which will bring up Hyperf default home page.
+   

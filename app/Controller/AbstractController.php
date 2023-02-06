@@ -11,6 +11,11 @@ namespace App\Controller;
 abstract class AbstractController
 {
 
-    protected string $serviceUri = 'http://172.16.82.11:9501';
+    protected string $serviceUri;
+
+    public function __construct()
+    {
+        $this->serviceUri = env('DTM_SELF_CLIENT_URI');
+    }
 
 }

@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use DtmClient\Api\ApiInterface;
-use DtmClient\Middleware\DtmMiddleware;
 use DtmClient\TCC;
 use DtmClient\TransContext;
 use Hyperf\DbConnection\Db;
@@ -47,7 +46,11 @@ class TccController extends AbstractController
                     $this->serviceUri . '/tcc/transA/cancel'
                 );
                 $tcc->callBranch(
-                    ['trans_name' => 'trans_B'],
+                    [
+                        'trans_name' => 'trans_B',
+                        'code' => 't1',
+                        'number' => 2,
+                    ],
                     $this->serviceUri . '/tcc/transB/try',
                     $this->serviceUri . '/tcc/transB/confirm',
                     $this->serviceUri . '/tcc/transB/cancel'
@@ -88,10 +91,13 @@ class TccController extends AbstractController
                 );
             });
         } catch (Throwable $exception) {
+            var_dump($exception->getMessage(), $exception->getTraceAsString());
             // Do Nothing
         }
+        return TransContext::getGid();
     }
 
+    #[Barrier]
     public function transATry(RequestInterface $request, ResponseInterface $response)
     {
         var_dump('A try');
@@ -99,10 +105,11 @@ class TccController extends AbstractController
         $code = $request->input('code');
         // 查询库存
         if (!Db::table('goods')->where('code', $code)->where('useful_num', '>=', $number)->exists()) {
-            return $response->withStatus(409);
+            return $response->json(['msg' => '库存不足'])->withStatus(409);
         }
+        // 冻结库存
         Db::table('goods')->where('code', $code)->update([
-            'useful_num' => Db::raw('useful_num -' . $number)
+            'lock_num' => Db::raw('lock_num +' . $number)
         ]);
 
         return [
@@ -110,11 +117,16 @@ class TccController extends AbstractController
         ];
     }
 
-    #[Barrier]
     public function transAConfirm(RequestInterface $request, ResponseInterface $response): array
     {
         var_dump('A confirm');
-
+        $number = $request->input('number');
+        $code = $request->input('code');
+        // 扣减库存
+        Db::table('goods')->where('code', $code)->update([
+            'lock_num' => Db::raw('lock_num -' . $number),
+            'useful_num' => Db::raw('useful_num -' . $number)
+        ]);
         return [
             'dtm_result' => 'SUCCESS',
         ];
@@ -123,46 +135,63 @@ class TccController extends AbstractController
     #[Barrier]
     public function transACancel(RequestInterface $request, ResponseInterface $response): array
     {
-        // var_dump('A cancel');
-        // // 减冻结库存
-        // try {
-        //     Db::table('goods')->where('code', $code)->update([
-        //         'useful_num' => Db::raw('useful_num +' . $number),
-        //     ]);
-        // } catch (\Throwable $e) {
-        //     return $response->withStatus(409);
-        // }
+        var_dump('A cancel');
+        $number = $request->input('number');
+        $code = $request->input('code');
+        // 恢复冻结库存
+        try {
+            Db::table('goods')->where('code', $code)->update([
+                'lock_num' => Db::raw('lock_num -' . $number),
+            ]);
+        } catch (\Throwable $e) {
+            return $response->withStatus(409);
+        }
 
-        return [
-            'dtm_result' => 'SUCCESS',
-        ];
-    }
-
-    public function transBTry(): array
-    {
-        var_dump('B try');
         return [
             'dtm_result' => 'SUCCESS',
         ];
     }
 
     #[Barrier]
-    public function transBTryFail(ResponseInterface $response)
+    public function transBTry(RequestInterface $request, ResponseInterface $response): array
     {
-        return $response->withStatus(409);
-    }
-
-    public function transBConfirm(): array
-    {
-        var_dump('B confirm');
+        var_dump('B try');
+        $code = $request->input('code');
+        // 校验CODE是否存在
+        if (!Db::table('other_goods')->where('code', $code)->exists()) {
+            return $response->json(['msg' => 'code不存在'])->withStatus(409);
+        }
         return [
             'dtm_result' => 'SUCCESS',
         ];
     }
 
-    public function transBCancel(): array
+    public function transBTryFail(ResponseInterface $response)
+    {
+        var_dump('B try failed');
+
+        return $response->withStatus(409);
+    }
+
+    public function transBConfirm(RequestInterface $request, ResponseInterface $response): array
+    {
+        var_dump('B confirm');
+        $number = $request->input('number');
+        $code = $request->input('code');
+        // 转入库存
+        Db::table('other_goods')->where('code', $code)->update([
+            'useful_num' => Db::raw('useful_num +' . $number)
+        ]);
+        return [
+            'dtm_result' => 'SUCCESS',
+        ];
+    }
+
+    #[Barrier]
+    public function transBCancel(RequestInterface $request, ResponseInterface $response)
     {
         var_dump('B cancel');
+
         return [
             'dtm_result' => 'SUCCESS',
         ];

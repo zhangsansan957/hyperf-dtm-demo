@@ -67,7 +67,7 @@ class SagaRedisController extends AbstractSagaController
     }
 
     #[RequestMapping(path: 'transOut')]
-    public function transOut(RequestInterface $request, ResponseInterface $response): string|ResponseInterface
+    public function transOut(RequestInterface $request, ResponseInterface $response)
     {
         $amount = $request->input('amount');
         if (is_null($amount)) {
